@@ -84,13 +84,27 @@ except FileNotFoundError as e:
     logger.warning(f"Modèle trafic non disponible : {e}")
     _traffic_model = _feature_names = _label_encoder = None
 
-# Chargement de l'explainer SHAP (explicabilité des prédictions)
-try:
-    _shap_explainer = _load_artifact(EXPLAINER_PATH)
-    logger.info("Explainer SHAP chargé OK")
-except FileNotFoundError:
-    logger.warning("Explainer SHAP non disponible — lancez train_traffic.py")
-    _shap_explainer = None
+# Explainer SHAP : chargé À LA DEMANDE (lazy), pas au démarrage.
+# POURQUOI : ce fichier est très lourd (~123 Mo en mémoire). Le charger
+# au boot faisait dépasser la limite de 512 Mo de l'hébergeur gratuit.
+# On le charge au premier appel de predict_traffic (voir _get_shap_explainer).
+# Le comportement est identique : SHAP fonctionne, il arrive juste au
+# premier usage au lieu du démarrage.
+_shap_explainer = None
+_shap_loaded = False   # False = pas encore tenté de charger
+
+def _get_shap_explainer():
+    """Charge l'explainer SHAP au premier appel, puis le garde en mémoire."""
+    global _shap_explainer, _shap_loaded
+    if not _shap_loaded:
+        _shap_loaded = True
+        try:
+            _shap_explainer = _load_artifact(EXPLAINER_PATH)
+            logger.info("Explainer SHAP chargé OK (à la demande)")
+        except FileNotFoundError:
+            logger.warning("Explainer SHAP non disponible — lancez train_traffic.py")
+            _shap_explainer = None
+    return _shap_explainer
 
 try:
     _anomaly_model = _load_artifact(MODEL_ANOMALY_PATH)
@@ -330,9 +344,10 @@ def predict_traffic(arret: str, date_pred) -> dict:
     #   contribution négative = pousse la prédiction vers le bas
     # On renvoie les 3 features les plus influentes.
     top_factors = []
-    if _shap_explainer is not None:
+    _explainer = _get_shap_explainer()
+    if _explainer is not None:
         try:
-            shap_values = _shap_explainer.shap_values(X)[0]
+            shap_values = _explainer.shap_values(X)[0]
             shap_df = pd.DataFrame({
                 'feature': _feature_names,
                 'shap'   : shap_values,
