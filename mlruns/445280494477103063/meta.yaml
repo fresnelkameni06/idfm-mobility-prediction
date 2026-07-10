@@ -1,0 +1,9 @@
+artifact_location: file:///D:\idfm-mobility\mlruns/445280494477103063
+creation_time: 1782915071425
+effective_trace_archival_retention: null
+experiment_id: '445280494477103063'
+last_update_time: 1782915071425
+lifecycle_stage: active
+name: idfm-clustering
+trace_location: null
+workspace: default

@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/914454cbe8844b89b98f8420ab45e451/artifacts
+end_time: 1781375308422
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: 914454cbe8844b89b98f8420ab45e451
+run_name: DecisionTree
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1781375307863
+status: 3
+tags: []
+user_id: hp

@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/d803bbdeca12452c9f6f2b8197c947a3/artifacts
+end_time: 1783557876507
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: d803bbdeca12452c9f6f2b8197c947a3
+run_name: LinearRegression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783557876260
+status: 3
+tags: []
+user_id: fresn

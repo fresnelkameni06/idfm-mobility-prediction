@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/4cf5c997c1284b6db11b35ac98f8308d/artifacts
+end_time: 1783557915106
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: 4cf5c997c1284b6db11b35ac98f8308d
+run_name: XGBoost
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783557908814
+status: 3
+tags: []
+user_id: fresn

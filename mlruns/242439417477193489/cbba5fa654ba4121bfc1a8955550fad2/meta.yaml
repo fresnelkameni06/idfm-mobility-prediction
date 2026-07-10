@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/cbba5fa654ba4121bfc1a8955550fad2/artifacts
+end_time: 1781375322354
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: cbba5fa654ba4121bfc1a8955550fad2
+run_name: XGBoost
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1781375318811
+status: 3
+tags: []
+user_id: hp

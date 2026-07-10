@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/1a95ac7118274468915ceaacca15bbe2/artifacts
+end_time: 1782925552999
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: 1a95ac7118274468915ceaacca15bbe2
+run_name: DecisionTree
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1782925552384
+status: 3
+tags: []
+user_id: fresn

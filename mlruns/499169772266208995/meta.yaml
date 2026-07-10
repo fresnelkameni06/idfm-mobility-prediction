@@ -1,0 +1,9 @@
+artifact_location: file:///D:\idfm-mobility\mlruns/499169772266208995
+creation_time: 1782900159107
+effective_trace_archival_retention: null
+experiment_id: '499169772266208995'
+last_update_time: 1782900159107
+lifecycle_stage: active
+name: idfm-anomaly-detection
+trace_location: null
+workspace: default

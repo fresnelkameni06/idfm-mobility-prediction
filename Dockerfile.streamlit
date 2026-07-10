@@ -1,0 +1,41 @@
+# ============================================================
+# Dockerfile.streamlit — conteneur de l'interface Streamlit
+# ============================================================
+# Recette pour construire l'image de l'interface.
+# Beaucoup plus légère que l'API : Streamlit ne fait qu'AFFICHER et
+# APPELER l'API. Il n'a ni modèles, ni Parquet, ni Prophet — juste
+# de quoi dessiner des pages et envoyer des requêtes HTTP.
+
+# --- 1. Image de base ---
+FROM python:3.14-slim
+
+# --- 2. Dossier de travail ---
+WORKDIR /app
+
+# --- 3. Dépendances ---
+# On réutilise le même requirements réduit. Streamlit n'a besoin que
+# de streamlit, plotly, pandas, requests — tous déjà dedans. Installer
+# quelques paquets en trop est sans conséquence, et garder UN seul
+# fichier de dépendances évite les divergences.
+COPY requirements-docker.txt .
+RUN pip install --no-cache-dir -r requirements-docker.txt
+
+# --- 4. Copier UNIQUEMENT l'interface ---
+# Pas de src/, pas de models/, pas de data/ : Streamlit ne touche jamais
+# aux modèles. Il parle à l'API par HTTP. C'est tout l'intérêt d'avoir
+# séparé les deux conteneurs.
+COPY streamlit_app/ ./streamlit_app/
+
+# --- 5. Port Streamlit ---
+EXPOSE 8501
+
+# --- 6. Lancement ---
+# --server.address 0.0.0.0 : écouter sur toutes les interfaces
+#   (sinon inaccessible depuis l'extérieur du conteneur).
+# --server.port 8501 : le port standard de Streamlit.
+# --server.headless true : pas d'ouverture de navigateur ni d'invite
+#   (on est dans un conteneur, pas sur un poste de dev).
+CMD ["streamlit", "run", "streamlit_app/app.py", \
+     "--server.address", "0.0.0.0", \
+     "--server.port", "8501", \
+     "--server.headless", "true"]

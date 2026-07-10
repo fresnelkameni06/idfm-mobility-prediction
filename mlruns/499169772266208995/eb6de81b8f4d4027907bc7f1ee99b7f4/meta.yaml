@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/499169772266208995/eb6de81b8f4d4027907bc7f1ee99b7f4/artifacts
+end_time: 1783476900742
+entry_point_name: ''
+experiment_id: '499169772266208995'
+lifecycle_stage: active
+run_id: eb6de81b8f4d4027907bc7f1ee99b7f4
+run_name: IsolationForest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783476896807
+status: 3
+tags: []
+user_id: fresn

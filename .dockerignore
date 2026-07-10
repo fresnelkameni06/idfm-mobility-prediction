@@ -1,0 +1,55 @@
+# ============================================================
+# .dockerignore — ce que Docker NE doit PAS emballer dans l'image
+# ============================================================
+# Sans ce fichier, Docker copierait tout le dossier — venv, notebooks,
+# historique MLflow, gros fichiers Power BI. L'image serait énorme et
+# lente à construire. On exclut tout ce qui ne sert pas à FAIRE TOURNER
+# l'API et Streamlit.
+
+# --- Environnements Python (jamais dans l'image : réinstallés via requirements) ---
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- Historique et expérimentation (inutiles en production) ---
+mlruns/
+notebooks/
+tests/
+monitoring/
+
+# --- Fichiers lourds hors sujet pour l'API ---
+powerbi/
+*.pbix
+spark/
+
+# --- Secrets : NE JAMAIS mettre dans l'image ---
+# Les identifiants seront injectés par docker-compose / l'hébergeur,
+# pas gravés dans l'image (sinon quiconque a l'image a vos mots de passe).
+.env
+.env.cloud
+stephane_accessKeys.csv
+# Le certificat Aiven est un secret : on l'exclut de l'image.
+# ATTENTION : on exclut CE fichier précis, pas tout data/external/,
+# car data/external/calendrier_feries_fr.csv, lui, DOIT être embarqué
+# (predict.py le lit pour calculer is_ferie / is_vacances).
+data/external/ca.pem
+
+# --- Git et divers ---
+.git/
+.github/
+.gitignore
+.dist/
+README.md
+
+# --- Scripts de test ponctuels (pas nécessaires au runtime) ---
+test_aiven.py
+voir_aiven.py
+diag.py
+create_table_aiven.py
+
+# --- Docker lui-même ---
+Dockerfile*
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/445280494477103063/86ea514f36ab42d8ac3d0dd407092d00/artifacts
+end_time: 1783487209769
+entry_point_name: ''
+experiment_id: '445280494477103063'
+lifecycle_stage: active
+run_id: 86ea514f36ab42d8ac3d0dd407092d00
+run_name: KMeans_k2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783487207665
+status: 3
+tags: []
+user_id: fresn

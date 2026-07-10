@@ -1,0 +1,56 @@
+# ============================================================
+# Dockerfile.api — conteneur de l'API FastAPI
+# ============================================================
+# Ce fichier est la RECETTE pour construire l'image de l'API.
+# Docker l'exécute ligne par ligne, de haut en bas.
+
+# --- 1. L'image de base ---
+# On part d'un Python 3.11 déjà installé, en version "slim"
+# (allégée : pas d'outils inutiles, image plus petite).
+# POURQUOI 3.11 et pas 3.14 ? Prophet et ses dépendances (Stan) sont
+# mieux supportés sur 3.11 ; les versions très récentes cassent parfois.
+FROM python:3.14-slim
+
+# --- 2. Dépendances système ---
+# Prophet compile du C++ (via cmdstanpy/Stan) et certaines librairies
+# ont besoin d'un compilateur. On installe le minimum, puis on nettoie
+# le cache apt pour ne pas alourdir l'image.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        gcc g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- 3. Le dossier de travail dans le conteneur ---
+# Tout ce qui suit se passe dans /app. C'est la racine du projet
+# vue de l'intérieur du conteneur.
+WORKDIR /app
+
+# --- 4. Installer les librairies AVANT de copier le code ---
+# POURQUOI copier requirements.txt en premier, séparément ?
+# Docker met en cache chaque étape. Tant que requirements.txt ne change
+# pas, Docker réutilise le cache et ne réinstalle pas tout à chaque
+# modification du code. Gain de temps énorme lors des reconstructions.
+COPY requirements-docker.txt .
+RUN pip install --no-cache-dir -r requirements-docker.txt
+
+# --- 5. Copier le code et les données nécessaires ---
+# On copie SEULEMENT ce dont l'API a besoin pour tourner.
+# Le .dockerignore a déjà écarté venv, mlruns, notebooks, secrets...
+COPY api/ ./api/
+COPY src/ ./src/
+COPY models/ ./models/
+COPY data/processed/ ./data/processed/
+COPY data/external/ ./data/external/
+# Note : data/external/ca.pem est exclu par .dockerignore (c'est un
+# secret). Seul calendrier_feries_fr.csv est copié ici.
+
+# --- 6. Le port exposé ---
+# L'API tourne sur le port 8000. On le déclare pour la documentation
+# (le mapping réel se fait dans docker-compose).
+EXPOSE 8000
+
+# --- 7. La commande de lancement ---
+# Ce qui s'exécute quand le conteneur démarre.
+# host 0.0.0.0 = écouter sur toutes les interfaces (obligatoire dans
+# un conteneur, sinon l'API n'est joignable que de l'intérieur).
+# Pas de --reload ici : c'est de la production, pas du développement.
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

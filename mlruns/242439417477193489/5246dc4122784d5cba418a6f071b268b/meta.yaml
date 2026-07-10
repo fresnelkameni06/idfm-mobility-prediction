@@ -1,0 +1,14 @@
+artifact_uri: file:///D:\idfm-mobility\mlruns/242439417477193489/5246dc4122784d5cba418a6f071b268b/artifacts
+end_time: 1783557908808
+entry_point_name: ''
+experiment_id: '242439417477193489'
+lifecycle_stage: active
+run_id: 5246dc4122784d5cba418a6f071b268b
+run_name: RandomForest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783557877852
+status: 3
+tags: []
+user_id: fresn

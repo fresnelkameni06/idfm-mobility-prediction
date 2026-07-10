@@ -1,0 +1,56 @@
+# ============================================================
+# docker-compose.yml — orchestre les deux conteneurs
+# ============================================================
+# Une seule commande lance tout :  docker-compose up --build
+#
+# Il utilise les deux recettes (Dockerfile.api, Dockerfile.streamlit),
+# construit les images, démarre les conteneurs, les connecte, et leur
+# fournit les secrets SANS les graver dans les images.
+
+services:
+
+  # ----------------------------------------------------------
+  # Service 1 — l'API FastAPI
+  # ----------------------------------------------------------
+  api:
+    build:
+      context: .                    # dossier de construction = racine du projet
+      dockerfile: Dockerfile.api    # la recette à utiliser
+    ports:
+      - "8000:8000"                 # port_hôte:port_conteneur
+                                    # → l'API est joignable sur localhost:8000
+    env_file:
+      - .env.cloud                  # injecte les identifiants Aiven au lancement
+                                    # (host, user, password, DB_SSL_CA...)
+                                    # Ils NE sont PAS dans l'image — sécurité.
+    volumes:
+      # Le certificat Aiven est un secret, exclu de l'image (.dockerignore).
+      # On le MONTE depuis votre disque vers le conteneur, en lecture seule.
+      # Ainsi l'API peut se connecter à Aiven en SSL sans que le certificat
+      # soit gravé dans l'image.
+      - ./data/external/ca.pem:/app/data/external/ca.pem:ro
+    restart: unless-stopped         # redémarre le conteneur s'il plante
+
+  # ----------------------------------------------------------
+  # Service 2 — l'interface Streamlit
+  # ----------------------------------------------------------
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"                 # → l'interface est sur localhost:8501
+    environment:
+      # Streamlit doit joindre l'API. Entre conteneurs, on utilise le NOM
+      # du service ("api"), pas localhost. docker-compose crée un réseau
+      # interne où "api" résout vers le conteneur de l'API.
+      - API_URL=http://api:8000
+    depends_on:
+      - api                         # ne démarre Streamlit qu'après l'API
+    restart: unless-stopped
+
+# ----------------------------------------------------------
+# NOTE — pas de service MySQL ici.
+# La base est hébergée sur Aiven (cloud), pas dans un conteneur.
+# L'API s'y connecte via les variables de .env.cloud + le certificat monté.
+# ----------------------------------------------------------

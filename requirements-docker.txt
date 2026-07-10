@@ -1,0 +1,45 @@
+# ============================================================
+# requirements-docker.txt — dépendances du CONTENEUR uniquement
+# ============================================================
+# Volontairement RÉDUIT par rapport à requirements.txt (votre venv complet).
+#
+# POURQUOI UN FICHIER SÉPARÉ ?
+# requirements.txt contient tout votre environnement de travail :
+# pyspark, mlflow, jupyter, pytest, boto3, seaborn... Ces outils servent
+# à EXPLORER et ENTRAÎNER sur votre PC. Le conteneur, lui, ne fait que
+# SERVIR les prédictions et l'interface. Il n'a besoin que du strict
+# nécessaire — sinon l'image pèse plusieurs Go et devient trop lourde
+# pour un hébergeur gratuit.
+#
+# Contenu déterminé en listant les imports réels de api/, src/, streamlit_app/.
+# Versions alignées sur votre requirements.txt pour éviter les surprises.
+
+# --- API ---
+fastapi==0.136.3
+uvicorn==0.49.0
+pydantic==2.13.4
+python-multipart==0.0.32
+
+# --- Cœur data / ML (prédiction) ---
+pandas==2.3.3
+numpy==2.4.6
+scikit-learn==1.9.0
+xgboost==3.2.0            # le modèle trafic est un RandomForest sklearn,
+                          # mais le .pkl peut référencer xgboost à la
+                          # désérialisation : on le garde par sécurité.
+shap==0.52.0             # predict.py calcule les facteurs SHAP au runtime
+prophet==1.3.0           # prédiction long terme (entraînée à la volée)
+pyarrow==24.0.0          # lecture du Parquet
+
+# --- Base de données (page "Ajouter" → Aiven) ---
+SQLAlchemy==2.0.50
+PyMySQL==1.2.0
+cryptography==48.0.1     # requis par PyMySQL pour la connexion SSL Aiven
+
+# --- Interface Streamlit ---
+streamlit==1.58.0
+plotly==5.24.1
+requests==2.34.2         # Streamlit appelle l'API via HTTP
+
+# --- Utilitaires ---
+python-dotenv==1.2.2

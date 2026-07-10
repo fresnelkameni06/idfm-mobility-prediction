@@ -1,0 +1,16 @@
+# ============================================================
+# .gitignore — on exclut UNIQUEMENT les secrets.
+# Tout le reste (mlruns, notebooks, data, models...) part sur GitHub.
+# ============================================================
+
+# --- SECRETS : les seuls fichiers à ne jamais publier ---
+.env
+.env.cloud
+data/external/ca.pem
+stephane_accessKeys.csv
+*.pem
+*accessKeys*.csv
+
+# --- Caches Python (inutiles, régénérés automatiquement) ---
+__pycache__/
+*.pyc

@@ -1,0 +1,9 @@
+artifact_location: file:///D:\idfm-mobility\mlruns/242439417477193489
+creation_time: 1781375304461
+effective_trace_archival_retention: null
+experiment_id: '242439417477193489'
+last_update_time: 1781375304461
+lifecycle_stage: active
+name: idfm-traffic-prediction
+trace_location: null
+workspace: default
