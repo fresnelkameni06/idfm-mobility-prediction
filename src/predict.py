@@ -84,13 +84,16 @@ except FileNotFoundError as e:
     logger.warning(f"Modèle trafic non disponible : {e}")
     _traffic_model = _feature_names = _label_encoder = None
 
-# Chargement de l'explainer SHAP (explicabilité des prédictions)
-try:
-    _shap_explainer = _load_artifact(EXPLAINER_PATH)
-    logger.info("Explainer SHAP chargé OK")
-except FileNotFoundError:
-    logger.warning("Explainer SHAP non disponible — lancez train_traffic.py")
-    _shap_explainer = None
+# SHAP DÉSACTIVÉ — on ne charge plus l'explainer (allège la mémoire).
+# Pour réactiver : décommenter ce bloc et le bloc "Explicabilité SHAP"
+# dans predict_traffic, puis remettre shap dans requirements-docker.txt.
+# try:
+#     _shap_explainer = _load_artifact(EXPLAINER_PATH)
+#     logger.info("Explainer SHAP chargé OK")
+# except FileNotFoundError:
+#     logger.warning("Explainer SHAP non disponible — lancez train_traffic.py")
+#     _shap_explainer = None
+_shap_explainer = None  # SHAP désactivé
 
 try:
     _anomaly_model = _load_artifact(MODEL_ANOMALY_PATH)
@@ -323,32 +326,31 @@ def predict_traffic(arret: str, date_pred) -> dict:
     else:
         confidence = 0.85  # valeur par défaut si pas de RandomForest
 
-    # ---- Explicabilité SHAP ----
-    # POURQUOI : expliquer POURQUOI le modèle a prédit cette valeur.
-    # Pour chaque feature, SHAP calcule sa contribution à la prédiction :
-    #   contribution positive = pousse la prédiction vers le haut
-    #   contribution négative = pousse la prédiction vers le bas
-    # On renvoie les 3 features les plus influentes.
+    # ---- Explicabilité SHAP (DÉSACTIVÉE) ----
+    # SHAP est désactivé pour alléger la mémoire. top_factors reste une
+    # liste vide : la réponse de l'API garde le champ, simplement sans
+    # facteurs. Pour réactiver, décommenter ci-dessous et recharger
+    # l'explainer au démarrage (voir plus haut).
     top_factors = []
-    if _shap_explainer is not None:
-        try:
-            shap_values = _shap_explainer.shap_values(X)[0]
-            shap_df = pd.DataFrame({
-                'feature': _feature_names,
-                'shap'   : shap_values,
-                'impact' : np.abs(shap_values)
-            }).sort_values('impact', ascending=False)
-
-            for _, row in shap_df.head(3).iterrows():
-                direction = ('augmente le trafic' if row['shap'] > 0
-                             else 'diminue le trafic')
-                top_factors.append({
-                    'feature'  : row['feature'],
-                    'shap'     : round(float(row['shap']), 1),
-                    'direction': direction
-                })
-        except Exception as e:
-            logger.warning(f"SHAP non calculé : {e}")
+    # if _shap_explainer is not None:
+    #     try:
+    #         shap_values = _shap_explainer.shap_values(X)[0]
+    #         shap_df = pd.DataFrame({
+    #             'feature': _feature_names,
+    #             'shap'   : shap_values,
+    #             'impact' : np.abs(shap_values)
+    #         }).sort_values('impact', ascending=False)
+    #
+    #         for _, row in shap_df.head(3).iterrows():
+    #             direction = ('augmente le trafic' if row['shap'] > 0
+    #                          else 'diminue le trafic')
+    #             top_factors.append({
+    #                 'feature'  : row['feature'],
+    #                 'shap'     : round(float(row['shap']), 1),
+    #                 'direction': direction
+    #             })
+    #     except Exception as e:
+    #         logger.warning(f"SHAP non calculé : {e}")
 
     return {
         'arret'                 : arret,

@@ -24,10 +24,6 @@ python-multipart==0.0.32
 pandas==2.3.3
 numpy==2.4.6
 scikit-learn==1.9.0
-xgboost==3.2.0            # le modèle trafic est un RandomForest sklearn,
-                          # mais le .pkl peut référencer xgboost à la
-                          # désérialisation : on le garde par sécurité.
-shap==0.52.0             # predict.py calcule les facteurs SHAP au runtime
 prophet==1.3.0           # prédiction long terme (entraînée à la volée)
 pyarrow==24.0.0          # lecture du Parquet
 
