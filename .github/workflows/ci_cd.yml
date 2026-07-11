@@ -1,0 +1,90 @@
+# ============================================================
+# CI/CD — GitHub Actions — IDFM Mobility
+# Fichier : .github/workflows/ci_cd.yml
+# ============================================================
+#
+# PIPELINE COMPLET EN DEUX TEMPS :
+#
+#   1. CI (tests)  — à chaque push sur main, lance les tests.
+#   2. CD (deploy) — SEULEMENT si les tests passent, déclenche le
+#                    redéploiement des deux services sur Render.
+#
+# LE POINT CLÉ : le déploiement dépend des tests. Si un test échoue,
+# le job "deploy" ne s'exécute pas (needs: tests). Render ne reçoit
+# rien, l'ancienne version reste en ligne. C'est un vrai garde-fou :
+# on ne met JAMAIS en ligne du code cassé.
+#
+# ┌──────────┐     tests OK ?     ┌───────────┐
+# │  tests   │ ─── oui ────────►  │  deploy   │  (appelle Render)
+# └──────────┘ ─── non ──► STOP   └───────────┘
+#
+# PRÉ-REQUIS (à configurer une fois) :
+#   - Sur Render : Auto-Deploy = OFF pour les deux services
+#     (sinon Render déploie en double, sans attendre les tests).
+#   - Sur Render : récupérer le "Deploy Hook" de chaque service.
+#   - Sur GitHub : Settings → Secrets and variables → Actions,
+#     créer deux secrets :
+#         RENDER_DEPLOY_HOOK_API
+#         RENDER_DEPLOY_HOOK_STREAMLIT
+# ============================================================
+
+name: CI-CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  # ==========================================================
+  # JOB 1 — TESTS (CI)
+  # ==========================================================
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+        with:
+          lfs: true            # les modèles .pkl sont sur Git LFS
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-docker.txt
+          pip install pytest httpx
+
+      - name: Lancer les tests
+        run: pytest tests/ -v
+
+  # ==========================================================
+  # JOB 2 — DÉPLOIEMENT (CD)
+  # ==========================================================
+  # needs: tests  →  ce job N'EST LANCÉ QUE si "tests" a réussi.
+  # if: ...push... →  et seulement sur un push (pas sur une pull request),
+  #                   pour ne pas déployer depuis une PR non fusionnée.
+  deploy:
+    needs: tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Déployer l'API sur Render
+        run: |
+          echo "Tests réussis — déclenchement du déploiement de l'API..."
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
+
+      - name: Déployer Streamlit sur Render
+        run: |
+          echo "Déclenchement du déploiement de l'interface Streamlit..."
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STREAMLIT }}"
+
+      - name: Confirmation
+        run: echo "Déploiement déclenché sur Render pour les deux services."
